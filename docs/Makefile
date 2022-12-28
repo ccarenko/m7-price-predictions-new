@@ -1,5 +1,5 @@
 .PHONY: test
-REPO := datascience/YOUR_REPO_HERE
+REPO := datascience/template # change template to your repo name
 
 install:
 	pip install -U poetry

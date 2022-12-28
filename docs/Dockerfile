@@ -1,15 +1,12 @@
-FROM python:3.9.15-slim AS builder
+FROM python:3.10-slim AS builder
+ENV PYTHONUNBUFFERED=1
 
-RUN \
-  apt-get -y update && \
-  apt-get -y upgrade && \
-  apt-get --no-install-recommends -y install git ssh postgresql postgresql-client gcc python3-dev musl-dev libffi-dev python3-dev libpq-dev git
-
+RUN apt-get -y update && apt-get -y upgrade && apt-get --no-install-recommends -y install git ssh
 RUN python -m venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
-RUN pip install -U pip && pip install psycopg2==2.8.6
+RUN pip install -U pip poetry
 
-
+# Set up gitlab authentication
 RUN mkdir /root/.ssh
 COPY id_rsa /root/.ssh/id_rsa
 RUN \
@@ -18,19 +15,15 @@ RUN \
   git config --global url."git@gitlab.com:".insteadOf "https://gitlab.com/"
 
 # Install the core deps
-COPY requirements_full.txt /
-RUN pip install -r /requirements_full.txt && pip install -U poetry
+COPY poetry.lock pyproject.toml /
+RUN poetry config virtualenvs.create false && poetry install --no-interaction --no-ansi --no-root && rm -f /root/.ssh/id_rsa
 
-FROM python:3.9.15-slim
-RUN \
-  apt-get update && \
-  apt-get install --no-install-recommends --yes postgresql \
-  amazon-ecr-credential-helper \
-  ssh \
-  git \
-  && rm -rf /var/lib/apt/lists/*
+# Create final image and transfer deps
+FROM python:3.10-slim
+ENV PYTHONUNBUFFERED=1
 COPY --from=builder /opt/venv /opt/venv
-COPY docker/config.json /root/.docker/config.json
 ENV PATH="/opt/venv/bin:$PATH"
-COPY ./ /arenkods
-RUN cd /arenkods && poetry install
+
+# This is the part you will probably need to change the most
+COPY . /
+RUN poetry install --only-root
