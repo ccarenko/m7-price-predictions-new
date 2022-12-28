@@ -1,0 +1,7 @@
+variables:
+  AWS_DOCKER_REPO: "596302374988.dkr.ecr.eu-west-2.amazonaws.com/datascience/YOUR_REPO_HERE"
+
+include:
+  project: "arenko-group/gitlab-shared-ci"
+  file: "/python/ci-yml/test-and-build.yml"
+  ref: "feature/makefile"

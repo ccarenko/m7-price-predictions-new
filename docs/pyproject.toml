@@ -1,0 +1,80 @@
+[build-system]
+build-backend = "poetry.core.masonry.api"
+requires = ["poetry-core"]
+
+[tool.poetry]
+authors = ["Samuel Hinton <sh@arenko.group>"]
+description = "template"
+name = "template"
+packages = [{include = "package", from = "src"}]
+readme = "README.md"
+version = "0.1.0"
+
+
+[tool.poetry.dependencies]
+python = ">=3.9,<3.11"
+
+
+[tool.poetry.group.test.dependencies]
+pytest = "^7.0.0"
+
+
+[tool.poetry.group.dev.dependencies]
+autoflake = "^1.4.0"
+black = "^22.12.0"
+flake8 = "^4.0.0"
+pre-commit = "^2.17.0"
+
+[tool.black]
+line-length = 120
+target-version = ['py39']
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "pass",
+    "if 0:",
+    "if __name__ == .__main__.:",
+    "nocov",
+    "if TYPE_CHECKING:",
+]
+
+[tool.coverage.run]
+branch = true
+omit = [
+    "tests/*"
+]
+
+[tool.isort]
+profile = "black"
+
+[tool.mypy]
+plugins = "pydantic.mypy"
+check_untyped_defs = true
+disallow_any_generics = true
+disallow_incomplete_defs = true
+disallow_subclassing_any = true
+disallow_untyped_calls = true
+disallow_untyped_decorators = false
+disallow_untyped_defs = true
+implicit_reexport = false
+no_implicit_optional = true
+python_version = "3.9"
+strict_equality = true
+warn_redundant_casts = true
+warn_return_any = true
+warn_unused_ignores = true
+
+[tool.pylint.FORMAT]
+max-line-length = 120
+
+[tool.pylint."MESSAGES CONTROL"]
+disable = "missing-docstring, line-too-long, logging-fstring-interpolation, no-self-argument, duplicate-code, no-name-in-module, too-few-public-methods"
+
+[tool.pytest.ini_options]
+addopts = "-v --cov-report term-missing --no-cov-on-fail"
+pythonpath = ["src"]
+testpaths = ["test"]
