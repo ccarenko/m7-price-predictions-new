@@ -4,7 +4,7 @@
 
 1. If your project has an image created through the `ecr-repositories` repo `main.tf` file.
     1. Modify the `Makefile` to point to that address
-    2. Modify the `.gitlab-ci.yml` to point to that address. Uncomment the `include` section of the pipeline to get pipelines running again.
+    2. Modify the `.gitlab-ci.yml.rename` by removing the `.rename` at the end of the file, and edit the file to point to that ECR. Uncomment the `include` section of the pipeline to get pipelines running again.
 2. In `pyproject.toml`, you may want to change quite a few things, such as the author, the package, etc
 3. The `poetry.toml` by default creates an in-project venv. If you want use a pre-existing venv, edit this file
 4. You'll probably need to copy an `id_rsa` key into the repo, plus customise the final build steps in the `Dockerfile`
