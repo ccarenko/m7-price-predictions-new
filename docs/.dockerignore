@@ -20,3 +20,7 @@
 # Dont copy tests across
 test
 
+# Poetry stuff
+poetry.toml
+.venv
+id_rsa
