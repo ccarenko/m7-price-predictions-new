@@ -26,4 +26,4 @@ ENV PATH="/opt/venv/bin:$PATH"
 
 # This is the part you will probably need to change the most
 COPY . /
-RUN poetry install --only-root
+RUN pip install --no-deps -e .
