@@ -20,6 +20,9 @@ push_image:
 	docker tag $(REPO):latest 596302374988.dkr.ecr.eu-west-2.amazonaws.com/$(REPO):latest
 	docker push 596302374988.dkr.ecr.eu-west-2.amazonaws.com/$(REPO):latest
 
+docker_run:
+	docker run -p 80:80 -i -e SOMEVAR=someval $(REPO)
+
 precommit:
 	poetry run pre-commit run --all-files
 
@@ -31,3 +34,5 @@ tests: test
 all: precommit update_deps tests build_image
 
 image: build_image push_image
+
+docker: build_image docker_run
