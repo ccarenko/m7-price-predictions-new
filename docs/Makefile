@@ -13,13 +13,12 @@ update_deps:
 	poetry export --with dev,test --without-hashes -f requirements.txt -o requirements_dev.txt
 
 build_image:
-	aws ecr get-login-password --region eu-west-2 | docker login --username AWS --password-stdin 596302374988.dkr.ecr.eu-west-2.amazonaws.com
 	docker build -t $(REPO) .
+
+push_image:
+	aws ecr get-login-password --region eu-west-2 | docker login --username AWS --password-stdin 596302374988.dkr.ecr.eu-west-2.amazonaws.com
 	docker tag $(REPO):latest 596302374988.dkr.ecr.eu-west-2.amazonaws.com/$(REPO):latest
 	docker push 596302374988.dkr.ecr.eu-west-2.amazonaws.com/$(REPO):latest
-
-build_image_local:
-	docker build -t $(REPO) .
 
 precommit:
 	poetry run pre-commit run --all-files
@@ -29,4 +28,6 @@ test:
 
 tests: test
 
-all: precommit update_deps tests build_image_local
+all: precommit update_deps tests build_image
+
+image: build_image push_image
