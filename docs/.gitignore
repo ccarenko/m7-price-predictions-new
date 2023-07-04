@@ -46,6 +46,7 @@ coverage*
 dmypy.json
 .idea
 .ipynb_checkpoints
+.ruff_cache
 .cache
 profile_default/
 ipython_config.py

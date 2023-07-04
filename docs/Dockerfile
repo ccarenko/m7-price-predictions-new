@@ -1,4 +1,4 @@
-FROM python:3.10-slim AS builder
+FROM python:3.11-slim AS builder
 ENV PYTHONUNBUFFERED=1
 
 RUN apt-get -y update && apt-get -y upgrade && apt-get --no-install-recommends -y install git ssh
@@ -19,7 +19,7 @@ COPY poetry.lock pyproject.toml /
 RUN poetry config virtualenvs.create false && poetry install --no-interaction --no-ansi --no-root && rm -f /root/.ssh/id_rsa
 
 # Create final image and transfer deps
-FROM python:3.10-slim
+FROM python:3.11-slim
 ENV PYTHONUNBUFFERED=1
 COPY --from=builder /opt/venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"

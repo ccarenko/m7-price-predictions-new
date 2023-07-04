@@ -6,12 +6,6 @@ install:
 	poetry install --with=dev,test --all-extras
 	poetry run pre-commit install
 
-update_deps:
-	poetry check
-	poetry lock
-	poetry export --without-hashes -f requirements.txt -o requirements.txt
-	poetry export --with dev,test --without-hashes -f requirements.txt -o requirements_dev.txt
-
 build_image:
 	docker build -t $(REPO) .
 
@@ -23,6 +17,9 @@ push_image:
 docker_run:
 	docker run -p 80:80 -i -e SOMEVAR=someval $(REPO)
 
+precommit-update:
+	poetry run pre-commit autoupdate
+
 precommit:
 	poetry run pre-commit run --all-files
 
@@ -31,7 +28,7 @@ test:
 
 tests: test
 
-all: precommit update_deps tests build_image
+all: precommit tests build_image
 
 image: build_image push_image
 
