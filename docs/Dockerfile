@@ -25,5 +25,10 @@ COPY --from=builder /opt/venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
 
 # This is the part you will probably need to change the most
+# For most images that run a service this will be to copy your
+# code in and then run it
 COPY . /
 RUN pip install --no-deps -e .
+RUN useradd -rs /bin/bash runner
+USER runner
+# CMD [ "./start.sh" ] # Or whatever you need to run here

@@ -20,7 +20,7 @@ pytest = "^7.4.0"
 [tool.poetry.group.dev.dependencies]
 black = ">=23.3.0"
 pre-commit = ">=3.3.3"
-ruff = ">=0.0.276"
+ruff = ">=0.0.276, <1"
 mypy = "^1.4.1"
 
 [tool.black]
