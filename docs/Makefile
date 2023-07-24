@@ -2,6 +2,7 @@
 REPO := datascience/template # change template to your repo name
 
 install:
+	pip install -U pip
 	pip install -U poetry
 	poetry install --with=dev,test --all-extras
 	poetry run pre-commit install
