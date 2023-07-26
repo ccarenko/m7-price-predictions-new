@@ -2,10 +2,10 @@
 REPO := datascience/template # change template to your repo name
 
 install:
-	pip install -U pip
-	pip install -U poetry
+	pip install -U pip poetry -q
 	poetry install --with=dev,test --all-extras
 	poetry run pre-commit install
+	poetry run pre-commit run --all-files
 
 build_image:
 	docker build -t $(REPO) .
@@ -17,9 +17,6 @@ push_image:
 
 docker_run:
 	docker run -p 80:80 -i -e SOMEVAR=someval $(REPO)
-
-precommit-update:
-	poetry run pre-commit autoupdate
 
 precommit:
 	poetry run pre-commit run --all-files
