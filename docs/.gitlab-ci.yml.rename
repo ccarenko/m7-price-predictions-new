@@ -4,3 +4,7 @@ variables:
 # include:
 #   project: "arenko-group/gitlab-shared-ci"
 #   file: "/python/ci-yml/test-and-build.yml"
+
+# unit_tests:
+# if a specific python version is needed
+# image: python:3.<minor_version>.<patch_version>-slim

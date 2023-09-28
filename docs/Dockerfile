@@ -1,4 +1,5 @@
 FROM python:3.11-slim AS builder
+# if a specific python version is needed change the above to FROM python:3.<minor_version>.<patch_version>-slim
 ENV PYTHONUNBUFFERED=1
 
 RUN apt-get -y update && apt-get -y upgrade && apt-get --no-install-recommends -y install git ssh
@@ -20,6 +21,7 @@ RUN poetry config virtualenvs.create false && poetry install --no-interaction --
 
 # Create final image and transfer deps
 FROM python:3.11-slim
+# if a specific python version is needed change the above to FROM python:3.<minor_version>.<patch_version>-slim
 ENV PYTHONUNBUFFERED=1
 COPY --from=builder /opt/venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
