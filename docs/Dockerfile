@@ -30,9 +30,9 @@ ENV PATH="/opt/venv/bin:$PATH"
 # For most images that run a service this will be to copy your
 # code in and then run it
 RUN useradd -mrs /bin/bash runner
-COPY src /home/runner
-WORKDIR /home/runner/src
-ENV PYTHONPATH="/home/runner/src"
+COPY src /home/runner/
+WORKDIR /home/runner
+ENV PYTHONPATH="/home/runner"
 USER runner
 # RUN chmod +x ./start.sh # if you need to make start.sh executable
 # CMD [ "./start.sh" ] # Or whatever you need to run here
