@@ -33,7 +33,6 @@ RUN useradd -mrs /bin/bash runner
 COPY src /home/runner
 WORKDIR /home/runner/src
 ENV PYTHONPATH="/home/runner/src"
-RUN pip install --no-deps -e .
 USER runner
 # RUN chmod +x ./start.sh # if you need to make start.sh executable
 # CMD [ "./start.sh" ] # Or whatever you need to run here
