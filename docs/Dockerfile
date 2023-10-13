@@ -26,11 +26,22 @@ ENV PYTHONUNBUFFERED=1
 COPY --from=builder /opt/venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
 
-# This is the part you will probably need to change the most
-# For most images that run a service this will be to copy your
-# code in and then run it
-COPY . /
-RUN pip install --no-deps -e .
-RUN useradd -rs /bin/bash runner
+# Create user with home directory
+RUN useradd -mrs /bin/bash runner
+
+# Copy in files
+WORKDIR /home/runner
+COPY src/ ./src
+
+# Ensure Python can find our code
+ENV PYTHONPATH="/home/runner/src"
+WORKDIR /home/runner/src
+
+# Recursively change the owner of the newly created /home/runner directory and give write permission
+RUN chown -R runner:runner /home/runner && chmod u+w /home/runner
 USER runner
+
+# This is the part you will probably need to change the most.
+# For most images that run a service you will need to run here the entrypoint script
+# RUN chmod +x ./start.sh # if you need to make start.sh executable
 # CMD [ "./start.sh" ] # Or whatever you need to run here
