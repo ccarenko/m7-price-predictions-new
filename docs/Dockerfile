@@ -35,6 +35,7 @@ COPY src/ ./src
 
 # Ensure Python can find our code
 ENV PYTHONPATH="/home/runner/src"
+WORKDIR /home/runner/src
 
 # Recursively change the owner of the newly created /home/runner directory and give write permission
 RUN chown -R runner:runner /home/runner && chmod u+w /home/runner
