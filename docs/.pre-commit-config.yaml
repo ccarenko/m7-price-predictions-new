@@ -13,12 +13,9 @@ repos:
         args:
           - --unsafe
       - id: trailing-whitespace
-  - repo: https://github.com/psf/black
-    rev: 23.9.1
-    hooks:
-      - id: black
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.0.291
+    rev: v0.1.5
     hooks:
       - id: ruff
-        args: ["--fix"]
+        args: ["--fix", "--no-unsafe-fixes"]
+      - id: ruff-format
