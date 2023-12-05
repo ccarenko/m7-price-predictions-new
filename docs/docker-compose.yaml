@@ -1,0 +1,174 @@
+x-logging: &default-logging
+  driver: loki
+  options:
+    loki-url: 'http://localhost:3100/api/prom/push'
+    loki-pipeline-stages: |
+      - multiline:
+          firstline: '^\d{4}-\d{2}-\d{2} \d{1,2}:\d{2}:\d{2}'
+          max_wait_time: 3s
+      - regex:
+          expression: '^(?P<time>\d{4}-\d{2}-\d{2} \d{1,2}:\d{2}:\d{2},d{3}) (?P<message>(?s:.*))$$'
+
+version: "3.8"
+
+services:
+
+
+  app-producer:
+    build: .
+    ports:
+      - "8000:8000"
+    depends_on:
+      - loki
+      - pulsar
+    environment:
+      APP_NAME: "producer"
+    command: "python pulsar_tracing/producer.py"
+    logging: *default-logging
+    deploy:
+      restart_policy:
+        condition: on-failure
+
+  app-transform_ab:
+    build: .
+    ports:
+      - "8001:8000"
+    depends_on:
+      - loki
+      - pulsar
+    environment:
+      APP_NAME: "transform_ab"
+      pulsar_topic_consume: "A"
+      pulsar_topic_produce: "B"
+    command: "python pulsar_tracing/app.py"
+    logging: *default-logging
+    deploy:
+      restart_policy:
+        condition: on-failure
+
+  app-transform_ac:
+    build: .
+    ports:
+      - "8002:8000"
+    depends_on:
+      - loki
+      - pulsar
+    environment:
+      APP_NAME: "transform_ac"
+      pulsar_topic_consume: "A"
+      pulsar_topic_produce: "C"
+    command: "python pulsar_tracing/app.py"
+    logging: *default-logging
+    deploy:
+      restart_policy:
+        condition: on-failure
+
+  app-transform_bd:
+    build: .
+    ports:
+      - "8003:8000"
+    depends_on:
+      - loki
+      - pulsar
+      - app-transform_ab
+    environment:
+      APP_NAME: "transform_bd"
+      pulsar_topic_consume: "B"
+      pulsar_topic_produce: "D"
+      sleep: "3"
+    command: "python pulsar_tracing/app.py"
+    logging: *default-logging
+    deploy:
+      restart_policy:
+        condition: on-failure
+
+  app-transform_de:
+    build: .
+    ports:
+      - "8004:8000"
+    depends_on:
+      - loki
+      - pulsar
+    environment:
+      APP_NAME: "transform_de"
+      pulsar_topic_consume: "D"
+      pulsar_topic_produce: "E"
+      sleep: "3"
+    command: "python pulsar_tracing/app.py"
+    logging: *default-logging
+    deploy:
+      restart_policy:
+        condition: on-failure
+
+  app-transform_ce:
+    build: .
+    ports:
+      - "8005:8000"
+    depends_on:
+      - loki
+      - pulsar
+    environment:
+      APP_NAME: "transform_ce"
+      pulsar_topic_consume: "C"
+      pulsar_topic_produce: "E"
+      sleep: "3"
+    command: "python pulsar_tracing/app.py"
+    logging: *default-logging
+    deploy:
+      restart_policy:
+        condition: on-failure
+
+  loki:
+    image: grafana/loki:2.8.3
+    command: -config.file=/etc/loki/local-config.yaml
+    ports:
+      - "3100:3100"
+
+  prometheus:
+    image: prom/prometheus:v2.48.0
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./etc/prometheus:/workspace
+    command:
+      - --config.file=/workspace/prometheus.yml
+      - --enable-feature=exemplar-storage
+    depends_on:
+      - loki
+    logging: *default-logging
+
+  tempo:
+    image: grafana/tempo:2.3.1
+    command: [ "--target=all", "--storage.trace.backend=local", "--storage.trace.local.path=/var/tempo", "--auth.enabled=false" ]
+    ports:
+      - "14250:14250"
+    depends_on:
+      - loki
+    logging: *default-logging
+
+  grafana:
+    image: grafana/grafana:10.1.0
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./etc/grafana/:/etc/grafana/provisioning/datasources
+      - ./etc/dashboards.yaml:/etc/grafana/provisioning/dashboards/dashboards.yaml
+      - ./etc/dashboards:/etc/grafana/dashboards
+    depends_on:
+      - loki
+      - prometheus
+    logging: *default-logging
+
+  pulsar:
+    image: apachepulsar/pulsar:3.1.1
+    ports:
+      - "6650:6650"
+      - "8080:8080"
+    environment:
+      - PULSAR_LOG_LEVEL=WARNING
+    tmpfs:
+      - /pulsar/data
+    command: [ "bin/pulsar", "standalone" ]
+    deploy:
+      restart_policy:
+        condition: on-failure
