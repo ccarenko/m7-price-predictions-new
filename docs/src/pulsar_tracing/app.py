@@ -9,10 +9,11 @@ import uvicorn
 from definitions.models.example import ExampleSimple
 from definitions.pulsar_client import Producer, PulsarClient
 from fastapi import FastAPI
-from opentelemetry.trace import NonRecordingSpan, SpanContext, TraceFlags, Tracer, set_span_in_context
+from opentelemetry.trace import Tracer
 
+from pulsar_tracing.prom import PrometheusMiddleware, metrics
 from pulsar_tracing.settings import Settings
-from pulsar_tracing.tracing import get_tracer
+from pulsar_tracing.tracing import add_tracing, trace_reader, tracer
 
 
 class Application(FastAPI):
@@ -37,7 +38,6 @@ async def lifespan(app: Application) -> AsyncGenerator[None, None]:
         ExampleSimple,
         timeout_seconds=1.0,
     )
-    tracer = get_tracer(settings.app_name, settings.tempo_endpoint)
     app.init(settings, producer, tracer)
     logging.info(f"Creating consumer for {settings.full_topic_consumer}")
     coro = pulsar_client.register_reader(
@@ -54,31 +54,22 @@ async def lifespan(app: Application) -> AsyncGenerator[None, None]:
     producer.close()
 
 
+@trace_reader
 async def consume_example(msg: ExampleSimple | None) -> None:
     if msg is None:
-        logging.error("Received None message")
         return
-    span_context = SpanContext(
-        trace_id=int(msg._properties["trace_id"]),
-        span_id=int(msg._properties["span_id"]),
-        is_remote=True,
-        trace_flags=TraceFlags(int(msg._properties["trace_flags"])),
-    )
-    ctx = set_span_in_context(NonRecordingSpan(span_context))
-    with app.tracer.start_as_current_span("consume_example", context=ctx) as span:
-        logging.info(f"Consuming {msg} from {app.settings.pulsar_topic_consume}")
-        await asyncio.sleep(0.3 * random())
-        msg2 = ExampleSimple(msg=msg.msg, num=msg.num * 10)
-        msg2._properties["trace_id"] = str(span.get_span_context().trace_id)
-        msg2._properties["span_id"] = str(span.get_span_context().span_id)
-        msg2._properties["trace_flags"] = str(span.get_span_context().trace_flags)
-        await app.producer.send(msg2)
-        logging.info(f"Sending {msg2} to {app.settings.pulsar_topic_produce}")
+    logging.info(f"Consuming {msg} from {app.settings.pulsar_topic_consume}")
+    await asyncio.sleep(0.3 * random())
+    msg2 = add_tracing(ExampleSimple(msg=msg.msg, num=msg.num * 10))
+    await app.producer.send(msg2)
+    logging.info(f"Sending {msg2} to {app.settings.pulsar_topic_produce}")
 
 
-time.sleep(Settings().sleep)
+init_settings = Settings()
+time.sleep(init_settings.sleep)
 app = Application(lifespan=lifespan)
-
+app.add_middleware(PrometheusMiddleware, app_name=init_settings.app_name)
+app.add_route("/metrics", metrics)
 
 if __name__ == "__main__":
     from uvicorn.config import LOGGING_CONFIG

@@ -1,6 +1,6 @@
 global:
-  scrape_interval: 15s # Set the scrape interval to every 15 seconds. Default is every 1 minute.
-  evaluation_interval: 15s # Evaluate rules every 15 seconds. The default is every 1 minute.
+  scrape_interval: 5s # Set the scrape interval to every 15 seconds. Default is every 1 minute.
+  evaluation_interval: 5s # Evaluate rules every 15 seconds. The default is every 1 minute.
   # scrape_timeout is set to the global default (10s).
 
 # Alertmanager configuration
@@ -23,18 +23,32 @@ scrape_configs:
     static_configs:
       - targets: ["localhost:9090"]
 
-  # - job_name: 'app-producer'
-  #   scrape_interval: 5s
-  #   static_configs:
-  #     - targets: ['app-transform1:8000']
+  - job_name: 'app-transform_ab'
+    scrape_interval: 5s
+    static_configs:
+      - targets:
+        - 'app-transform_ab:8000'
 
+  - job_name: 'app-transform_ac'
+    scrape_interval: 5s
+    static_configs:
+      - targets:
+        - 'app-transform_ac:8000'
 
-  # - job_name: 'app-transform1'
-  #   scrape_interval: 5s
-  #   static_configs:
-  #     - targets: ['app-transform1:8001']
+  - job_name: 'app-transform_bd'
+    scrape_interval: 5s
+    static_configs:
+      - targets:
+        - 'app-transform_bd:8000'
 
-  # - job_name: 'app-transform2'
-  #   scrape_interval: 5s
-  #   static_configs:
-  #     - targets: ['app-transform2:8002']
+  - job_name: 'app-transform_de'
+    scrape_interval: 5s
+    static_configs:
+      - targets:
+        - 'app-transform_de:8000'
+
+  - job_name: 'app-transform_ce'
+    scrape_interval: 5s
+    static_configs:
+      - targets:
+        - 'app-transform_ce:8000'
