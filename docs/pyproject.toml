@@ -4,27 +4,15 @@ requires = ["poetry-core"]
 
 [tool.poetry]
 authors = ["Samuel Hinton <sh@arenko.group>"]
-description = "pulsar_tracing"
-name = "pulsar_tracing"
-packages = [{include = "pulsar_tracing", from = "src"}]
+description = "template"
+name = "template"
+packages = [{include = "package", from = "src"}]
 readme = "README.md"
 version = "0.1.0"
 
 
 [tool.poetry.dependencies]
 python = ">=3.11,<3.12"
-fastapi = ">=0.104.1"
-uvicorn = ">=0.24.0.post1"
-prometheus-client = ">=0.19.0"
-opentelemetry-sdk = "^1.21.0"
-opentelemetry-api = "^1.21.0"
-pulsar-client = "^3.3.0"
-definitions = { git = "ssh://git@gitlab.com/arenko-group/data-definitions.git", rev = "develop", develop = true, extras = [
-    "pulsar",
-] }
-pydantic-settings = "^2.1.0"
-opentelemetry-exporter-otlp = "^1.21.0"
-opentelemetry-instrumentation-logging = "^0.42b0"
 
 [tool.poetry.group.test.dependencies]
 pytest = "^7.4.0"
